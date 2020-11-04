@@ -1,0 +1,113 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.DepositCertificateMapper">
+
+    <sql id="Base_Column_List">
+        dc.id,
+       dc.certificate_name,
+       dc.certificate_role,
+       dc.certificate_logo,
+       dc.user_id,
+       dc.specification,
+       dc.case_number,
+       dc.batch_number,
+       dc.amount,
+       dc.purchasing_company,
+       dc.product_name,
+       dc.create_time,
+       dc.create_by,
+       dc.update_time,
+       dc.update_by,
+       dc.audit_time,
+       dc.hasd_value,
+       dc.block_height,
+       dc.template_id,
+       dc.appli_time,
+       dc.on_chain_status,
+       dc.on_chain_time,
+       dc.audit_remark,
+       dc.audit_status,
+       dc.parameter
+        </sql>
+
+    <select id="certificatePage" resultType="me.zhengjie.modules.system.domain.vo.DepositCertificateVo">
+        select<include refid="Base_Column_List"/>,
+        (select nd.value from new_dict nd where nd.code= dc.certificate_role) certificateRoleName,
+        c.company_name,
+        c.logo companyLogo,
+        (select dct.template_name from deposit_certificate_template dct where dct.id = dc.template_id) category
+        FROM deposit_certificate dc,
+        user_company uc,
+        company c
+        WHERE 1=1
+        AND dc.`user_id` = uc.user_id
+        AND uc.company_id = c.id
+        <if test="userId != null">
+            and dc.user_id = #{userId}
+        </if>
+        <if test="depositCertificateSearchRq.certificateName != null and depositCertificateSearchRq.certificateName != ''">
+            and CONCAT_WS(',', dc.certificate_name, dc.batch_number,dc.case_number) like concat(concat("%",#{depositCertificateSearchRq.certificateName}),"%")
+        </if>
+        <if test="depositCertificateSearchRq.companyName != null and depositCertificateSearchRq.companyName != ''">
+            and c.company_name like concat(concat("%",#{depositCertificateSearchRq.companyName}),"%")
+        </if>
+
+        <if test="depositCertificateSearchRq.onChainStatus3 != null ">
+            and dc.on_chain_status = #{depositCertificateSearchRq.onChainStatus3}
+        </if>
+        <if test="depositCertificateSearchRq.startTime != null  ">
+            and date_format(dc.create_time,'%Y-%m-%d') <![CDATA[ >= ]]>
+            date_format(#{depositCertificateSearchRq.startTimeStr},'%Y-%m-%d')
+        </if>
+        <if test="depositCertificateSearchRq.endTime != null  ">
+            and date_format(dc.create_time,'%Y-%m-%d') <![CDATA[ <= ]]>
+            date_format(#{depositCertificateSearchRq.endTimeStr},'%Y-%m-%d')
+        </if>
+        <if test="depositCertificateSearchRq.id != null ">
+            and dc.id = #{depositCertificateSearchRq.id}
+        </if>
+        order by dc.create_time desc
+    </select>
+    <select id="auditChain" resultType="me.zhengjie.modules.system.domain.vo.AuditOnChainVo">
+        select dc.*,c.wallet_address
+        from deposit_certificate dc,
+             sys_user u,
+             user_company uc,
+             company c
+        where 1=1
+        and dc.user_id = u.user_id
+        and u.user_id= uc.user_id
+        and uc.company_id = c.id
+        and dc.id = #{id}
+    </select>
+    <select id="GetDepositCertificateService"
+            resultType="me.zhengjie.modules.system.eth.dto.CompanyDepositCertificateDto">
+         select dc.*,c.*
+        from deposit_certificate dc,
+             sys_user u,
+             user_company uc,
+             company c
+        where 1=1
+        and dc.user_id = u.user_id
+        and u.user_id= uc.user_id
+        and uc.company_id = c.id
+        and dc.id = #{id}
+    </select>
+    <select id="certificateShopPage" resultType="me.zhengjie.modules.system.domain.vo.DepositCertificateVo">
+        select<include refid="Base_Column_List"/>,
+        (select nd.value from new_dict nd where nd.code= dc.certificate_role) certificateRoleName,
+        c.company_name,
+        c.logo companyLogo,
+        (select dct.template_name from deposit_certificate_template dct where dct.id = dc.template_id) category
+        FROM deposit_certificate dc,
+        user_company uc,
+        company c
+        WHERE 1=1
+        <if test="depositCertificateShopRq.id != null">
+            and dc.id = #{depositCertificateShopRq.id}
+        </if>
+        AND dc.`user_id` = uc.user_id
+        AND uc.company_id = c.id
+        and dc.on_chain_status = 2
+        order by dc.create_time desc
+    </select>
+</mapper>

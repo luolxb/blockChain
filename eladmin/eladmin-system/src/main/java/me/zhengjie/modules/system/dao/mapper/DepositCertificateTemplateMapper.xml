@@ -1,0 +1,27 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.DepositCertificateTemplateMapper">
+    <sql id="Base_Column_List">
+            dct.id,
+           dct.product_name,
+           dct.specification,
+           dct.case_number,
+           dct.batch_number,
+           dct.amount,
+           dct.purchasing_company,
+           dct.create_time,
+           dct.create_by,
+           dct.update_time,
+           dct.update_by,
+           dct.template_name,
+           dct.template_remark,
+           dct.parameter,
+           dct.certificate_logo
+        </sql>
+
+    <select id="templatePage" resultType="me.zhengjie.modules.system.domain.vo.DepositCertificateTemplateVo">
+        select
+        <include refid="Base_Column_List"/>
+        from deposit_certificate_template dct
+        order by dct.create_time desc
+    </select>
+</mapper>

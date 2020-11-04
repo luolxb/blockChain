@@ -1,0 +1,36 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.UserCompanyMapper">
+
+
+    <select id="sendUserCompany2Shop" resultType="me.zhengjie.modules.shop.domin.UserCompanyShopVo1">
+        SELECT
+          su.`user_id` userId,
+          su.`phone` mobile,
+          su.`phone` nikeName,
+          su.`phone` password,
+          c.`id` companyId
+        FROM
+          sys_user su
+          JOIN user_company uc
+            ON uc.user_id = su.user_id
+          JOIN company c
+            ON c.`id` = uc.`company_id`
+        WHERE 1 = 1
+          AND su.`phone` = #{phone};
+
+    </select>
+    <select id="getUserCompanyVoByCompanyId" resultType="me.zhengjie.modules.system.domain.vo.UserCompanyVo">
+        SELECT
+            su.*
+        FROM
+          sys_user su
+          JOIN user_company uc
+            ON uc.user_id = su.user_id
+          JOIN company c
+            ON c.`id` = uc.`company_id`
+        WHERE 1 = 1
+          AND  c.`id` = #{id};
+    </select>
+
+
+</mapper>

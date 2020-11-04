@@ -1,0 +1,32 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.SysRoleMenusMapper">
+
+
+    <select id="findMenuByRoleId" resultType="me.zhengjie.modules.system.service.dto.MenuDto">
+        SELECT
+          sm.`menu_id` id,
+          sm.`pid`,
+          sm.`sub_count`,
+          sm.`type`,
+          sm.`title`,
+          sm.`name`,
+          sm.`component`,
+          sm.`menu_sort`,
+          sm.`icon`,
+          sm.`path`,
+          sm.`i_frame`,
+          sm.`cache`,
+          sm.`hidden`,
+          sm.`permission`,
+          sm.`create_by`,
+          sm.`update_by`,
+          sm.`create_time`,
+          sm.`update_time`
+        FROM
+          sys_menu sm
+          JOIN sys_roles_menus srm
+            ON srm.menu_id = sm.menu_id
+        WHERE 1 = 1
+          AND srm.role_id = #{roleId}
+    </select>
+</mapper>

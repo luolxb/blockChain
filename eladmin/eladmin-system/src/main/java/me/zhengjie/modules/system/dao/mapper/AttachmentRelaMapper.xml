@@ -1,0 +1,21 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.AttachmentRelaMapper">
+
+    <select id="getLocalStorage" resultType="me.zhengjie.domain.LocalStorage">
+        select tls.*,
+        tls.storage_id id
+        from tool_local_storage tls,
+        attachment_rela ar
+        where 1=1
+        and tls.storage_id = ar.attachment_id
+        <if test="relaId !=null">
+            and ar.rela_id = #{relaId}
+        </if>
+        <if test="attachmentType != null and attachmentType != '' ">
+            and ar.attachment_type = #{attachmentType}
+        </if>
+        <if test="relaType != null">
+            and ar.rela_type = #{relaType}
+        </if>
+    </select>
+</mapper>

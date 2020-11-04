@@ -1,0 +1,133 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.CompanyMapper">
+    <sql id="Base_Column_List">
+       c.id,
+       c.company_type,
+       c.company_name,
+       c.brand_name,
+       c.corporate,
+       c.logo,
+       c.business_license,
+       c.social_credit_code,
+       c.address,
+       c.profile,
+       c.company_phone,
+       c.wallet_address,
+       c.create_time,
+       c.create_by,
+       c.update_time,
+       c.update_by,
+       c.status,
+       c.audit_status,
+       c.audit_time,
+       c.code,
+       c.private_key
+    </sql>
+    <update id="updateCompany">
+        update company
+        <trim prefix="SET" suffixOverrides=",">
+            company_type = #{companyType},
+            company_name = #{companyName},
+            corporate = #{corporate},
+            logo = #{logo},
+            business_license = #{businessLicense},
+            social_credit_code = #{socialCreditCode},
+            address = #{address},
+            PROFILE = #{profile},
+            company_phone = #{companyPhone},
+            wallet_address = #{walletAddress},
+            update_by = #{updateBy},
+            update_time = #{updateTime},
+            brand_name = #{brandName},
+        </trim>
+        <where>
+            and id = #{id}
+        </where>
+    </update>
+
+
+    <select id="companyPage" resultType="me.zhengjie.modules.system.domain.vo.CompanyVo">
+        select
+        <include refid="Base_Column_List"/>,
+        (select nd.value from new_dict nd where nd.code = c.company_type) companyTypeName
+        from company c
+        <where>
+            <if test="companySearchRq.companyName != null and companySearchRq.companyName != ''">
+                and c.company_name like concat('%',#{companySearchRq.companyName},'%')
+            </if>
+            <if test="companySearchRq.id != null">
+                and c.id = #{companySearchRq.id}
+            </if>
+            <if test="companySearchRq.companyType != null and companySearchRq.companyType != ''">
+                and c.company_type = #{companySearchRq.companyType}
+            </if>
+            <if test="companySearchRq.userName != null and companySearchRq.userName != ''">
+                and c.company_phone like concat('%',#{companySearchRq.userName},'%')
+            </if>
+            <if test="companySearchRq.auditStatus != null ">
+                and c.audit_status = #{companySearchRq.auditStatus}
+            </if>
+            <if test="companySearchRq.startTime != null  ">
+                and date_format(c.create_time,'%Y-%m-%d') <![CDATA[ >= ]]>
+                date_format(#{companySearchRq.startTimeStr},'%Y-%m-%d')
+            </if>
+            <if test="companySearchRq.endTime != null  ">
+                and date_format(c.create_time,'%Y-%m-%d') <![CDATA[ <= ]]>
+                date_format(#{companySearchRq.endTimeStr},'%Y-%m-%d')
+            </if>
+        </where>
+        order by c.create_time desc
+    </select>
+
+
+    <select id="userCompany" resultType="me.zhengjie.modules.system.domain.vo.UserCompanyVo">
+        SELECT
+        u.*,
+        <include refid="Base_Column_List"/>,
+        (select nd.value from new_dict nd where nd.code = c.company_type) companyTypeName
+        FROM
+        sys_user u
+        left JOIN user_company uc
+        ON u.user_id = uc.`user_id`
+        left JOIN company c
+        ON c.`id` = uc.`company_id`
+        WHERE u.user_id = #{userId}
+    </select>
+    <select id="companyTokenPage" resultType="me.zhengjie.modules.system.domain.vo.CompanyTokenSearchVo">
+        SELECT
+        c.company_name,
+        c.wallet_address,
+        (select count(dc.id) from deposit_certificate dc where dc.user_id = u.user_id and dc.on_chain_status = 2)
+        depositCertificateNumber
+        FROM
+        company c,
+        user_company uc,
+        sys_user u
+        WHERE 1 = 1
+        AND uc.user_id = u.user_id
+        AND uc.company_id = c.`id`
+        <if test="userId != null">
+            and u.user_id = #{userId}
+        </if>
+        <if test="companyTokenSearchRq.companyName != null and companyTokenSearchRq.companyName != '' ">
+            and c.company_name= #{companyTokenSearchRq.companyName}
+        </if>
+        <if test="companyTokenSearchRq.walletAddress != null and companyTokenSearchRq.walletAddress != '' ">
+            and c.wallet_address= #{companyTokenSearchRq.walletAddress}
+        </if>
+        order by depositCertificateNumber desc
+    </select>
+    <select id="getCompanyByCreateBy" resultType="me.zhengjie.modules.system.domain.vo.CompanyVo">
+        SELECT
+         <include refid="Base_Column_List"></include>
+        FROM
+          sys_user su
+          JOIN user_company uc
+            ON uc.`user_id` = su.`user_id`
+          JOIN company c
+            ON c.`id` = uc.`company_id`
+        WHERE su.`username` = #{createBy}
+    </select>
+
+
+</mapper>

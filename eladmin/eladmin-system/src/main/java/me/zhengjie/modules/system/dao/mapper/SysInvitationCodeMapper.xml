@@ -1,0 +1,48 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="me.zhengjie.modules.system.dao.SysInvitationCodeMapper">
+
+    <sql id="Base_Column_List">
+        sic.id,
+        sic.CODE,
+        sic.create_time,
+        sic.create_by,
+        sic.update_time,
+        sic.update_by,
+        sic.is_use
+        </sql>
+
+
+    <select id="codePage" resultType="me.zhengjie.modules.system.domain.vo.SysInvitationCodeVo">
+        SELECT
+        sic.id,
+        sic.`code`,
+        sic.`is_use`,
+        su.`username`,
+        c.`company_name`
+        FROM
+        sys_invitation_code sic
+        LEFT JOIN sys_user su
+        ON sic.`code` = su.`code`
+        LEFT JOIN company c
+        ON c.`code` = sic.`code`
+        where 1=1
+        <if test="sysInvitationCodeSearchRq.code != null and sysInvitationCodeSearchRq.code != ''">
+            and sic.code like concat('%',#{sysInvitationCodeSearchRq.code},'%')
+        </if>
+        <if test="sysInvitationCodeSearchRq.userName != null and sysInvitationCodeSearchRq.userName != ''">
+            and su.username like concat('%',#{sysInvitationCodeSearchRq.userName},'%')
+        </if>
+        <if test="sysInvitationCodeSearchRq.companyName != null and sysInvitationCodeSearchRq.companyName != ''">
+            and c.company_name like concat('%',#{sysInvitationCodeSearchRq.companyName},'%')
+        </if>
+        <if test="sysInvitationCodeSearchRq.startTime != null  ">
+            and date_format(sic.create_time,'%Y-%m-%d') <![CDATA[ >= ]]>
+            date_format(#{sysInvitationCodeSearchRq.startTimeStr},'%Y-%m-%d')
+        </if>
+        <if test="sysInvitationCodeSearchRq.endTime != null  ">
+            and date_format(sic.create_time,'%Y-%m-%d') <![CDATA[ <= ]]>
+            date_format(#{sysInvitationCodeSearchRq.endTimeStr},'%Y-%m-%d')
+        </if>
+        order by sic.create_time desc
+    </select>
+</mapper>
